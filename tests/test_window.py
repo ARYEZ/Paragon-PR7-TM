@@ -95,14 +95,15 @@ def test_program_end_enter_closes_r_restarts(window):
 def test_admin_profile_asks_windows(window):
     asked = []
     window.answers["elevate"] = lambda p: asked.append(p.name) or True
-    assert window.new_tab(1) is None and asked == ["sh as administrator"]
+    assert window.new_tab(1) is None and asked == [window.profiles[1].name]
 
 
 def test_new_tab_menu_lists_profiles_and_sessions(window, data):
     window.sessions = [sessions.Session("NAS", "nas.local", user="ari")]
     m = window.new_tab_menu()
     texts = [a.text() for a in m.actions() if a.text()]
-    assert texts[:3] == ["THIS PC", "sh", "sh as administrator"]
+    names = [p.name for p in window.profiles]
+    assert texts[:3] == ["THIS PC", *names[:2]]
     assert "SAVED SESSIONS" in texts and "NAS  ·  ari@nas.local" in texts and "Quick connect…" in texts
 
 

@@ -40,7 +40,11 @@ def test_powershell_colours_stay_in_the_family():
     b, t, _ = run_backend([ps, "-NoLogo", "-NoProfile"], b"Write-Host -ForegroundColor Green 'green-text'\r",
                           "green-text")
     from pr7tm import colours
-    row = next(r for r in t.rows() if "green-text" in t.row_text(r) and "Write-Host" not in t.row_text(r))
+
+    def printed():                     # the output line, not the typed command (which also says green-text)
+        return [r for r in t.rows() if "green-text" in t.row_text(r) and "Write-Host" not in t.row_text(r)]
+    assert wait(printed, 30), t.screen_text()
+    row = printed()[0]
     x = t.row_text(row).index("green-text")
     fg = colours.resolve(row[x].fg, colours.FOREGROUND)
     assert fg == colours.PALETTE["brightgreen"] or fg == colours.PALETTE["green"], (row[x].fg, fg)  # pearl
