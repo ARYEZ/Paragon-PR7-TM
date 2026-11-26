@@ -48,10 +48,12 @@ jobs:
       - name: Check the build
         shell: pwsh
         run: |
-          foreach ($f in "Qt6Network.dll", "qwindows.dll", "winpty*.pyd") {
+          foreach ($f in "Qt6Network.dll", "qwindows.dll", "OpenConsole.exe") {
             if (-not (Get-ChildItem -Recurse dist/PR7-TM/_internal -Filter $f)) { throw "$f is missing" }
           }
-          Get-ChildItem -Recurse dist/PR7-TM/_internal -Filter "winpty*" | ForEach-Object { "ConPTY part: $($_.Name)" }
+          $wp = Get-ChildItem -Recurse dist/PR7-TM/_internal | Where-Object { $_.FullName -match '\\winpty' }
+          $wp | ForEach-Object { "ConPTY part: $($_.FullName.Substring($_.FullName.IndexOf('_internal')))" }
+          if (-not ($wp | Where-Object { $_.Extension -eq ".pyd" })) { throw "pywinpty's extension module is missing" }
           foreach ($f in "dist/PR7-TM/PR7-TM.exe", "dist/PR7-TM/_internal/pr7tm/fonts/Inter-Regular.ttf",
                          "dist/PR7-TM/_internal/pr7tm/icons/app.ico") {
             if (-not (Test-Path $f)) { throw "missing $f" }
